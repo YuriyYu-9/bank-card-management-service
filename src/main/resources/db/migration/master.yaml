@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - changeSet:
+      id: 000-init-placeholder
+      author: yuriy
+      changes:
+        - sql:
+            sql: "SELECT 1;"
