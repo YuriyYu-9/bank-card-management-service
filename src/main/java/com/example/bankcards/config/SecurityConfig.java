@@ -1,6 +1,9 @@
 package com.example.bankcards.config;
 
+import com.example.bankcards.dto.ErrorResponse;
 import com.example.bankcards.security.JwtAuthFilter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,10 +17,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 @Configuration
 public class SecurityConfig {
+
+    private final ObjectMapper objectMapper;
+
+    public SecurityConfig(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -33,30 +43,17 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
-
-                // JWT API -> без сессий
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                // чтобы не было Saved request ...?continue
                 .requestCache(rc -> rc.disable())
 
-                // Явные 401/403 ответы
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
-                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                            response.getWriter().write("""
-                                    {"error":"UNAUTHORIZED","message":"Authentication required"}
-                                    """);
+                            writeJson(response, HttpServletResponse.SC_UNAUTHORIZED,
+                                    ErrorResponse.of("UNAUTHORIZED", "Authentication required", request.getRequestURI()));
                         })
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                            response.getWriter().write("""
-                                    {"error":"FORBIDDEN","message":"Access denied"}
-                                    """);
+                            writeJson(response, HttpServletResponse.SC_FORBIDDEN,
+                                    ErrorResponse.of("FORBIDDEN", "Access denied", request.getRequestURI()));
                         })
                 )
 
@@ -71,7 +68,13 @@ public class SecurityConfig {
                 )
 
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-
                 .build();
+    }
+
+    private void writeJson(HttpServletResponse response, int status, ErrorResponse body) throws IOException {
+        response.setStatus(status);
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        objectMapper.writeValue(response.getOutputStream(), body);
     }
 }
