@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
@@ -67,6 +68,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private void writeUnauthorized(HttpServletResponse response, HttpServletRequest request) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
         var body = ErrorResponse.of("UNAUTHORIZED", "Invalid or expired JWT token", request.getRequestURI());
