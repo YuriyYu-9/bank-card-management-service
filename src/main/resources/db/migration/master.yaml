@@ -1,3 +1,7 @@
 databaseChangeLog:
   - include:
       file: db/migration/001-init-schema.yaml
+  - include:
+      file: db/migration/002-update-admin-password.yaml
+  - include:
+      file: db/migration/003-admin-password-bcrypt.yaml

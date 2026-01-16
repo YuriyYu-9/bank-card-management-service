@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: bank-card-management-service
+  security:
+    debug: true
 
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/bankcards}
@@ -25,13 +27,13 @@ spring:
 
 logging:
   level:
-    root: INFO
-    org.springframework.security: INFO
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
 
 app:
   security:
     jwt:
-      secret: ${JWT_SECRET:change-me-in-env}
+      secret: ${JWT_SECRET:dev-secret-please-change-dev-secret-please}
       access-token-ttl-minutes: ${JWT_TTL_MINUTES:30}
 
   crypto:
