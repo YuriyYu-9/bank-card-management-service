@@ -35,6 +35,8 @@ app:
     jwt:
       secret: ${JWT_SECRET:dev-secret-please-change-dev-secret-please}
       access-token-ttl-minutes: ${JWT_TTL_MINUTES:30}
+  pan:
+    secretBase64: "+SJ/yuQOQJ1PylhtVmlkmfU6yEKr5qI4MjJHYdLzJSo="
 
   crypto:
     card-number-secret: ${CARD_NUMBER_SECRET:change-me-in-env}
