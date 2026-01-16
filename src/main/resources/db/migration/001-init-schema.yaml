@@ -297,11 +297,15 @@ databaseChangeLog:
             tableName: users
             columns:
               - column: { name: username, value: "admin" }
-              - column: { name: password_hash, value: "{noop}admin" }
+              - column: { name: password_hash, value: "$2a$10$bZJF2DWP29elv1899myMMu7O3ZAOA60n8tMuCEzGafIjJERpDgvEG" }
               - column: { name: enabled, valueBoolean: true }
 
-        - insert:
-            tableName: user_roles
-            columns:
-              - column: { name: user_id, valueNumeric: 1 }
-              - column: { name: role_id, valueNumeric: 1 }
+        - sql:
+            splitStatements: false
+            stripComments: true
+            sql: |
+              INSERT INTO user_roles (user_id, role_id)
+              SELECT u.id, r.id
+              FROM users u
+              JOIN roles r ON r.name = 'ADMIN'
+              WHERE u.username = 'admin';
