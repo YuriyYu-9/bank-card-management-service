@@ -21,8 +21,9 @@ public class RestExceptionHandler {
             MethodArgumentNotValidException ex,
             HttpServletRequest request
     ) {
-        String details = ex.getBindingResult().getAllErrors().stream()
-                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+        String details = ex.getBindingResult().getFieldErrors().stream()
+                .map(err -> err.getField() + ": " + err.getDefaultMessage())
+                .distinct()
                 .collect(Collectors.joining("; "));
 
         String message = (details == null || details.isBlank())
@@ -30,13 +31,10 @@ public class RestExceptionHandler {
                 : "Validation failed: " + details;
 
         return ResponseEntity.status(400).body(
-                ErrorResponse.of(
-                        "VALIDATION_ERROR",
-                        message,
-                        request.getRequestURI()
-                )
+                ErrorResponse.of("VALIDATION_ERROR", message, request.getRequestURI())
         );
     }
+
 
     @ExceptionHandler({ BadCredentialsException.class, AuthenticationException.class })
     public ResponseEntity<ErrorResponse> handleUnauthorized(
