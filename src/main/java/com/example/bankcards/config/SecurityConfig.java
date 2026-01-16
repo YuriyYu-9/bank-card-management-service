@@ -3,13 +3,15 @@ package com.example.bankcards.config;
 import com.example.bankcards.dto.ErrorResponse;
 import com.example.bankcards.security.JwtAuthFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -21,6 +23,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final ObjectMapper objectMapper;
@@ -43,27 +46,42 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
+                .cors(Customizer.withDefaults())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .requestCache(rc -> rc.disable())
 
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            writeJson(response, HttpServletResponse.SC_UNAUTHORIZED,
-                                    ErrorResponse.of("UNAUTHORIZED", "Authentication required", request.getRequestURI()));
-                        })
-                        .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            writeJson(response, HttpServletResponse.SC_FORBIDDEN,
-                                    ErrorResponse.of("FORBIDDEN", "Access denied", request.getRequestURI()));
-                        })
+                        .authenticationEntryPoint((request, response, authException) -> writeJson(
+                                response,
+                                HttpServletResponse.SC_UNAUTHORIZED,
+                                ErrorResponse.of("UNAUTHORIZED", "Authentication required", request.getRequestURI())
+                        ))
+                        .accessDeniedHandler((request, response, accessDeniedException) -> writeJson(
+                                response,
+                                HttpServletResponse.SC_FORBIDDEN,
+                                ErrorResponse.of("FORBIDDEN", "Access denied", request.getRequestURI())
+                        ))
                 )
 
                 .authorizeHttpRequests(auth -> auth
+                        // ВАЖНО: чтобы /error не уходил под Security (forward/error dispatcher)
+                        .dispatcherTypeMatchers(DispatcherType.ERROR, DispatcherType.FORWARD).permitAll()
+
+                        // Public endpoints
                         .requestMatchers(
+                                "/error",
                                 "/actuator/health",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/api/auth/**"
                         ).permitAll()
+
+                        // Admin endpoints (B2)
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                        // User endpoints (B2)
+                        .requestMatchers("/api/cards/**").hasAnyRole("USER", "ADMIN")
+
                         .anyRequest().authenticated()
                 )
 

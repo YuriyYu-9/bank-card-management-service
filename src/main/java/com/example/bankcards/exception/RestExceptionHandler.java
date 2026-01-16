@@ -2,10 +2,9 @@ package com.example.bankcards.exception;
 
 import com.example.bankcards.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -35,18 +34,23 @@ public class RestExceptionHandler {
         );
     }
 
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<ErrorResponse> handleApi(
+            ApiException ex,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity.status(ex.getStatus()).body(
+                ErrorResponse.of(ex.getError(), ex.getMessage(), request.getRequestURI())
+        );
+    }
 
-    @ExceptionHandler({ BadCredentialsException.class, AuthenticationException.class })
+    @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorized(
             AuthenticationException ex,
             HttpServletRequest request
     ) {
         return ResponseEntity.status(401).body(
-                ErrorResponse.of(
-                        "UNAUTHORIZED",
-                        "Unauthorized",
-                        request.getRequestURI()
-                )
+                ErrorResponse.of("UNAUTHORIZED", "Unauthorized", request.getRequestURI())
         );
     }
 
@@ -56,11 +60,17 @@ public class RestExceptionHandler {
             HttpServletRequest request
     ) {
         return ResponseEntity.status(403).body(
-                ErrorResponse.of(
-                        "FORBIDDEN",
-                        "Forbidden",
-                        request.getRequestURI()
-                )
+                ErrorResponse.of("FORBIDDEN", "Forbidden", request.getRequestURI())
+        );
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleIntegrity(
+            DataIntegrityViolationException ex,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity.status(409).body(
+                ErrorResponse.of("CONFLICT", "Operation violates database constraints", request.getRequestURI())
         );
     }
 }
