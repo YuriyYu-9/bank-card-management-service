@@ -1,13 +1,18 @@
 package com.example.bankcards.controller;
 
-import com.example.bankcards.dto.*;
+import com.example.bankcards.dto.LoginRequest;
+import com.example.bankcards.dto.LoginResponse;
 import com.example.bankcards.security.JwtService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.authentication.*;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.security.core.Authentication;
 
+@Tag(name = "Auth")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -20,6 +25,7 @@ public class AuthController {
         this.jwtService = jwtService;
     }
 
+    @Operation(summary = "Login and receive JWT access token")
     @PostMapping("/login")
     public LoginResponse login(@RequestBody @Valid LoginRequest req) {
         Authentication auth = authManager.authenticate(

@@ -4,6 +4,7 @@ import com.example.bankcards.dto.CardResponse;
 import com.example.bankcards.dto.CardState;
 import com.example.bankcards.service.CardService;
 import com.example.bankcards.util.CardMapper;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class CardController {
 
     @GetMapping("/my")
     public Page<CardResponse> myCards(
-            Pageable pageable,
+            @ParameterObject Pageable pageable,
             @RequestParam(required = false) CardState status,
             @RequestParam(required = false) String last4
     ) {

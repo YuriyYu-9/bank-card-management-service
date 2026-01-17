@@ -64,10 +64,8 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
-                        // ВАЖНО: чтобы /error не уходил под Security (forward/error dispatcher)
                         .dispatcherTypeMatchers(DispatcherType.ERROR, DispatcherType.FORWARD).permitAll()
 
-                        // Public endpoints
                         .requestMatchers(
                                 "/error",
                                 "/actuator/health",
@@ -76,11 +74,11 @@ public class SecurityConfig {
                                 "/api/auth/**"
                         ).permitAll()
 
-                        // Admin endpoints (B2)
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        // User endpoints (B2)
                         .requestMatchers("/api/cards/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/transfers/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/block-requests/**").hasAnyRole("USER", "ADMIN")
 
                         .anyRequest().authenticated()
                 )

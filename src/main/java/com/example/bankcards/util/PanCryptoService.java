@@ -40,7 +40,6 @@ public class PanCryptoService {
 
             byte[] ct = cipher.doFinal(pan.getBytes(StandardCharsets.UTF_8));
 
-            // store: base64(iv).base64(ciphertext)
             return Base64.getEncoder().encodeToString(iv) + "." + Base64.getEncoder().encodeToString(ct);
         } catch (Exception e) {
             throw new IllegalStateException("PAN encryption failed", e);

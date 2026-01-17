@@ -24,7 +24,6 @@ public interface CardRepository extends JpaRepository<Card, Long> {
 
     boolean existsByIdAndOwnerId(Long id, Long ownerId);
 
-    // EXPIRED (вычисляемое): expiry < текущего year/month
     @Query("""
            select c
            from Card c

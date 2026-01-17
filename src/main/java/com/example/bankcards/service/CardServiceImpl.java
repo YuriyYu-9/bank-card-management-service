@@ -60,7 +60,6 @@ public class CardServiceImpl implements CardService {
         String last4Part = (last4 == null) ? null : last4.trim();
         boolean hasLast4 = last4Part != null && !last4Part.isBlank();
 
-        // EXPIRED — вычисляемое: используем запрос по expiryYear/expiryMonth (с пагинацией корректно)
         if (status == CardState.EXPIRED) {
             YearMonth now = YearMonth.now();
             if (hasLast4) {
