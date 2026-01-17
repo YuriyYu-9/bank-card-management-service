@@ -1,4 +1,3 @@
-// src/main/java/com/example/bankcards/config/WebConfig.java
 package com.example.bankcards.config;
 
 import org.springframework.context.annotation.Configuration;

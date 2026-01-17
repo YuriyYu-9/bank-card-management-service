@@ -309,3 +309,26 @@ databaseChangeLog:
               FROM users u
               JOIN roles r ON r.name = 'ADMIN'
               WHERE u.username = 'admin';
+
+  - changeSet:
+      id: 008-cards-status-constraint-and-version-default
+      author: yuriy
+      changes:
+        - sql:
+            splitStatements: false
+            stripComments: true
+            sql: |
+              UPDATE cards SET status = 'ACTIVE' WHERE status = 'EXPIRED';
+
+        - addDefaultValue:
+            tableName: cards
+            columnName: version
+            defaultValueNumeric: 0
+
+        - sql:
+            splitStatements: false
+            stripComments: true
+            sql: |
+              ALTER TABLE cards
+              ADD CONSTRAINT chk_cards_status
+              CHECK (status IN ('ACTIVE', 'BLOCKED'));

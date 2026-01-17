@@ -20,19 +20,16 @@ public class AdminCardController {
         this.cardService = cardService;
     }
 
-    // ADMIN: создать карту
     @PostMapping
     public CardResponse create(@Valid @RequestBody CardCreateRequest req) {
         return CardMapper.toResponse(cardService.create(req));
     }
 
-    // ADMIN: сменить статус
     @PatchMapping("/{id}/status")
     public CardResponse changeStatus(@PathVariable Long id, @Valid @RequestBody CardStatusUpdateRequest req) {
         return CardMapper.toResponse(cardService.adminChangeStatus(id, req.status()));
     }
 
-    // ADMIN: удалить карту
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         cardService.adminDelete(id);
