@@ -1,6 +1,7 @@
 package com.example.bankcards.service;
 
 import com.example.bankcards.dto.CardCreateRequest;
+import com.example.bankcards.dto.CardState;
 import com.example.bankcards.entity.Card;
 import com.example.bankcards.entity.CardStatus;
 import com.example.bankcards.exception.ApiException;
@@ -13,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.YearMonth;
 
 @Service
 public class CardServiceImpl implements CardService {
@@ -52,14 +55,37 @@ public class CardServiceImpl implements CardService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<Card> myCards(Pageable pageable, CardStatus status, String last4) {
+    public Page<Card> myCards(Pageable pageable, CardState status, String last4) {
         Long ownerId = currentUserId();
+        String last4Part = (last4 == null) ? null : last4.trim();
+        boolean hasLast4 = last4Part != null && !last4Part.isBlank();
 
-        if (status != null) {
-            return cardRepository.findByOwnerIdAndStatus(ownerId, status, pageable);
+        // EXPIRED — вычисляемое: используем запрос по expiryYear/expiryMonth (с пагинацией корректно)
+        if (status == CardState.EXPIRED) {
+            YearMonth now = YearMonth.now();
+            if (hasLast4) {
+                return cardRepository.findExpiredByOwnerIdAndPanLast4Containing(ownerId, last4Part, now.getYear(), now.getMonthValue(), pageable);
+            }
+            return cardRepository.findExpiredByOwnerId(ownerId, now.getYear(), now.getMonthValue(), pageable);
         }
-        if (last4 != null && !last4.isBlank()) {
-            return cardRepository.findByOwnerIdAndPanLast4Containing(ownerId, last4.trim(), pageable);
+
+        // ACTIVE/BLOCKED
+        if (status != null) {
+            CardStatus dbStatus = switch (status) {
+                case ACTIVE -> CardStatus.ACTIVE;
+                case BLOCKED -> CardStatus.BLOCKED;
+                case EXPIRED -> throw new IllegalStateException("EXPIRED handled above");
+            };
+
+            if (hasLast4) {
+                return cardRepository.findByOwnerIdAndStatusAndPanLast4Containing(ownerId, dbStatus, last4Part, pageable);
+            }
+            return cardRepository.findByOwnerIdAndStatus(ownerId, dbStatus, pageable);
+        }
+
+        // без статуса
+        if (hasLast4) {
+            return cardRepository.findByOwnerIdAndPanLast4Containing(ownerId, last4Part, pageable);
         }
         return cardRepository.findByOwnerId(ownerId, pageable);
     }

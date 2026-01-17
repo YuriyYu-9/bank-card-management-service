@@ -22,7 +22,7 @@ public class User {
     @Column(nullable = false)
     private boolean enabled;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false, insertable = false)
     private LocalDateTime createdAt;
 
     @ManyToMany(fetch = FetchType.EAGER)
