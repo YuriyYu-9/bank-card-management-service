@@ -44,7 +44,6 @@ public class BlockRequestServiceImpl implements BlockRequestService {
             throw ApiException.conflict("Card is already blocked");
         }
 
-        // если истекла — блокировать уже не имеет смысла, плюс по ТЗ операции запрещены
         boolean expired = CardExpiryUtils.isExpired(card.getExpiryMonth(), card.getExpiryYear(), YearMonth.now());
         if (expired) {
             throw ApiException.conflict("Card is expired");

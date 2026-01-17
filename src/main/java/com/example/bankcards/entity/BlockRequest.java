@@ -23,7 +23,6 @@ public class BlockRequest {
     @Column(nullable = false, length = 16)
     private BlockRequestStatus status;
 
-    // created_at выставляется БД
     @Column(name = "created_at", nullable = false, updatable = false, insertable = false)
     private LocalDateTime createdAt;
 
