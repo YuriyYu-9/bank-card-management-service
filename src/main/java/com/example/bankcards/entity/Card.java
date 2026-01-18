@@ -1,6 +1,7 @@
 package com.example.bankcards.entity;
 
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -41,7 +42,6 @@ public class Card {
     @Column(nullable = false)
     private Long version;
 
-    // created_at выставляется БД через defaultValueComputed: CURRENT_TIMESTAMP в Liquibase
     @Column(name = "created_at", nullable = false, updatable = false, insertable = false)
     private LocalDateTime createdAt;
 

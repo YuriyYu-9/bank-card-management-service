@@ -7,6 +7,7 @@ import com.example.bankcards.util.BlockRequestMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +31,7 @@ public class BlockRequestController {
 
     @Operation(summary = "List own block requests")
     @GetMapping("/my")
-    public Page<BlockRequestResponse> my(Pageable pageable) {
+    public Page<BlockRequestResponse> my(@ParameterObject Pageable pageable) {
         return blockRequests.myRequests(pageable).map(BlockRequestMapper::toResponse);
     }
 }

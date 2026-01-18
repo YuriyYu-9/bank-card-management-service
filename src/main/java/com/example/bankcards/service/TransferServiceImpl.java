@@ -25,9 +25,7 @@ public class TransferServiceImpl implements TransferService {
     private final TransferRepository transferRepository;
     private final UserRepository userRepository;
 
-    public TransferServiceImpl(CardRepository cardRepository,
-                               TransferRepository transferRepository,
-                               UserRepository userRepository) {
+    public TransferServiceImpl(CardRepository cardRepository, TransferRepository transferRepository, UserRepository userRepository) {
         this.cardRepository = cardRepository;
         this.transferRepository = transferRepository;
         this.userRepository = userRepository;
@@ -66,7 +64,6 @@ public class TransferServiceImpl implements TransferService {
         from.setBalanceCents(from.getBalanceCents() - amount);
         to.setBalanceCents(to.getBalanceCents() + amount);
 
-        // Явно сохраняем обновлённые балансы (читаемо + надёжно).
         cardRepository.save(from);
         cardRepository.save(to);
 
@@ -103,7 +100,7 @@ public class TransferServiceImpl implements TransferService {
     private Long currentUserId() {
         String username = SecurityUtils.currentUsername();
         if (username == null) {
-            throw new ApiException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "Authentication required");
+            throw new ApiException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "Unauthorized");
         }
         return userRepository.findByUsername(username)
                 .map(u -> u.getId())

@@ -1,10 +1,13 @@
 package com.example.bankcards.config;
 
+import com.example.bankcards.dto.ErrorResponse;
+import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
@@ -12,6 +15,8 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.Map;
 
 @Configuration
 @OpenAPIDefinition(
@@ -47,27 +52,46 @@ import org.springframework.context.annotation.Configuration;
 )
 public class OpenApiConfig {
 
-    /**
-     * Adds common error responses to all operations automatically.
-     * Keeps Swagger UI informative without duplicating annotations in each controller.
-     */
     @Bean
     public OpenApiCustomizer commonErrorResponsesCustomizer() {
-        return openApi -> openApi.getPaths().values().forEach(pathItem ->
-                pathItem.readOperations().forEach(op -> {
-                    addErrorResponse(op.getResponses(), "400", "Bad Request");
-                    addErrorResponse(op.getResponses(), "401", "Unauthorized");
-                    addErrorResponse(op.getResponses(), "403", "Forbidden");
-                    addErrorResponse(op.getResponses(), "404", "Not Found");
-                    addErrorResponse(op.getResponses(), "409", "Conflict");
-                    addErrorResponse(op.getResponses(), "500", "Internal Server Error");
-                })
-        );
+        return openApi -> {
+            // 1) Гарантируем, что схема ErrorResponse реально существует в components.schemas
+            ensureErrorResponseSchema(openApi);
+
+            // 2) Добавляем типовые ошибки во все операции
+            if (openApi.getPaths() == null) return;
+
+            openApi.getPaths().values().forEach(pathItem ->
+                    pathItem.readOperations().forEach(op -> {
+                        addErrorResponse(op.getResponses(), "400", "Bad Request");
+                        addErrorResponse(op.getResponses(), "401", "Unauthorized");
+                        addErrorResponse(op.getResponses(), "403", "Forbidden");
+                        addErrorResponse(op.getResponses(), "404", "Not Found");
+                        addErrorResponse(op.getResponses(), "409", "Conflict");
+                        addErrorResponse(op.getResponses(), "500", "Internal Server Error");
+                    })
+            );
+        };
     }
 
-    private void addErrorResponse(io.swagger.v3.oas.models.responses.ApiResponses responses,
-                                  String code,
-                                  String description) {
+    private void ensureErrorResponseSchema(io.swagger.v3.oas.models.OpenAPI openApi) {
+        if (openApi.getComponents() == null) {
+            openApi.setComponents(new Components());
+        }
+
+        // Если схема уже есть — не трогаем
+        Map<String, Schema> existing = openApi.getComponents().getSchemas();
+        if (existing != null && existing.containsKey("ErrorResponse")) {
+            return;
+        }
+
+        // Принудительно генерим схему из класса ErrorResponse и кладём в components.schemas
+        Map<String, Schema> schemas = ModelConverters.getInstance().read(ErrorResponse.class);
+        schemas.forEach((name, schema) -> openApi.getComponents().addSchemas(name, schema));
+    }
+
+    private void addErrorResponse(io.swagger.v3.oas.models.responses.ApiResponses responses, String code, String description) {
+        if (responses == null) return;
         if (responses.containsKey(code)) return;
 
         ApiResponse apiResponse = new ApiResponse()

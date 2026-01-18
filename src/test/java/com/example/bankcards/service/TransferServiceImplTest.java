@@ -39,7 +39,6 @@ class TransferServiceImplTest {
 
     @Test
     void createMyTransfer_ok_updatesBalancesAndSavesTransfer() {
-        // arrange current user
         User u = new User();
         u.setId(2L);
         u.setUsername("user");

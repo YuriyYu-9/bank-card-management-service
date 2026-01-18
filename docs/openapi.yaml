@@ -544,11 +544,31 @@ paths:
       summary: List own transfers
       operationId: my
       parameters:
-        - name: pageable
+        - name: page
           in: query
-          required: true
+          description: Zero-based page index (0..N)
+          required: false
           schema:
-            $ref: "#/components/schemas/Pageable"
+            type: integer
+            default: 0
+            minimum: 0
+        - name: size
+          in: query
+          description: The size of the page to be returned
+          required: false
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+        - name: sort
+          in: query
+          description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
       responses:
         "200":
           description: OK
@@ -742,11 +762,31 @@ paths:
       summary: List own block requests
       operationId: my_1
       parameters:
-        - name: pageable
+        - name: page
           in: query
-          required: true
+          description: Zero-based page index (0..N)
+          required: false
           schema:
-            $ref: "#/components/schemas/Pageable"
+            type: integer
+            default: 0
+            minimum: 0
+        - name: size
+          in: query
+          description: The size of the page to be returned
+          required: false
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+        - name: sort
+          in: query
+          description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
       responses:
         "200":
           description: OK
@@ -796,11 +836,31 @@ paths:
         - admin-user-controller
       operationId: list
       parameters:
-        - name: pageable
+        - name: page
           in: query
-          required: true
+          description: Zero-based page index (0..N)
+          required: false
           schema:
-            $ref: "#/components/schemas/Pageable"
+            type: integer
+            default: 0
+            minimum: 0
+        - name: size
+          in: query
+          description: The size of the page to be returned
+          required: false
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+        - name: sort
+          in: query
+          description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
       responses:
         "200":
           description: OK
@@ -850,11 +910,31 @@ paths:
         - admin-block-request-controller
       operationId: list_1
       parameters:
-        - name: pageable
+        - name: page
           in: query
-          required: true
+          description: Zero-based page index (0..N)
+          required: false
           schema:
-            $ref: "#/components/schemas/Pageable"
+            type: integer
+            default: 0
+            minimum: 0
+        - name: size
+          in: query
+          description: The size of the page to be returned
+          required: false
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+        - name: sort
+          in: query
+          description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
         - name: status
           in: query
           required: false
@@ -1195,21 +1275,6 @@ components:
             - BLOCKED
       required:
         - status
-    Pageable:
-      type: object
-      properties:
-        page:
-          type: integer
-          format: int32
-          minimum: 0
-        size:
-          type: integer
-          format: int32
-          minimum: 1
-        sort:
-          type: array
-          items:
-            type: string
     PageMetadata:
       type: object
       properties:
@@ -1261,6 +1326,22 @@ components:
             $ref: "#/components/schemas/UserResponse"
         page:
           $ref: "#/components/schemas/PageMetadata"
+    ErrorResponse:
+      description: Unified error response format
+      properties:
+        error:
+          type: string
+          example: VALIDATION_ERROR
+        message:
+          type: string
+          example: "Validation failed: field: message"
+        timestamp:
+          type: string
+          format: date-time
+          example: 2026-01-17T10:00:00Z
+        path:
+          type: string
+          example: /api/cards/my
   securitySchemes:
     bearerAuth:
       type: http

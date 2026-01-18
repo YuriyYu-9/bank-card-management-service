@@ -6,6 +6,7 @@ import com.example.bankcards.dto.UserRolesUpdateRequest;
 import com.example.bankcards.service.AdminUserService;
 import com.example.bankcards.util.UserMapper;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,7 +24,7 @@ public class AdminUserController {
     }
 
     @GetMapping
-    public Page<UserResponse> list(Pageable pageable) {
+    public Page<UserResponse> list(@ParameterObject Pageable pageable) {
         return adminUsers.listUsers(pageable).map(UserMapper::toResponse);
     }
 

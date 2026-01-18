@@ -31,11 +31,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain chain
-    ) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+            throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
 
@@ -59,7 +56,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             chain.doFilter(request, response);
-
         } catch (Exception ex) {
             SecurityContextHolder.clearContext();
             writeUnauthorized(response, request);
@@ -71,7 +67,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        var body = ErrorResponse.of("UNAUTHORIZED", "Invalid or expired JWT token", request.getRequestURI());
+        var body = ErrorResponse.of("UNAUTHORIZED", "Unauthorized", request.getRequestURI());
         objectMapper.writeValue(response.getOutputStream(), body);
     }
 }
