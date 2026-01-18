@@ -49,23 +49,20 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .requestCache(rc -> rc.disable())
-
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> writeJson(
                                 response,
                                 HttpServletResponse.SC_UNAUTHORIZED,
-                                ErrorResponse.of("UNAUTHORIZED", "Authentication required", request.getRequestURI())
+                                ErrorResponse.of("UNAUTHORIZED", "Unauthorized", request.getRequestURI())
                         ))
                         .accessDeniedHandler((request, response, accessDeniedException) -> writeJson(
                                 response,
                                 HttpServletResponse.SC_FORBIDDEN,
-                                ErrorResponse.of("FORBIDDEN", "Access denied", request.getRequestURI())
+                                ErrorResponse.of("FORBIDDEN", "Forbidden", request.getRequestURI())
                         ))
                 )
-
                 .authorizeHttpRequests(auth -> auth
                         .dispatcherTypeMatchers(DispatcherType.ERROR, DispatcherType.FORWARD).permitAll()
-
                         .requestMatchers(
                                 "/error",
                                 "/actuator/health",
@@ -73,16 +70,12 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/api/auth/**"
                         ).permitAll()
-
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-
                         .requestMatchers("/api/cards/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/api/transfers/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/api/block-requests/**").hasAnyRole("USER", "ADMIN")
-
                         .anyRequest().authenticated()
                 )
-
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

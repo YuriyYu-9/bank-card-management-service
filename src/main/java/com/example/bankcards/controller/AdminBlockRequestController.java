@@ -4,6 +4,7 @@ import com.example.bankcards.dto.BlockRequestResponse;
 import com.example.bankcards.entity.BlockRequestStatus;
 import com.example.bankcards.service.BlockRequestService;
 import com.example.bankcards.util.BlockRequestMapper;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,7 +23,7 @@ public class AdminBlockRequestController {
 
     @GetMapping
     public Page<BlockRequestResponse> list(
-            Pageable pageable,
+            @ParameterObject Pageable pageable,
             @RequestParam(required = false) BlockRequestStatus status,
             @RequestParam(required = false) Long cardId
     ) {

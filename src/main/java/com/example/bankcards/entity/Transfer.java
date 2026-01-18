@@ -1,6 +1,7 @@
 package com.example.bankcards.entity;
 
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -22,7 +23,6 @@ public class Transfer {
     @Column(name = "amount_cents", nullable = false)
     private long amountCents;
 
-    // created_at выставляется БД
     @Column(name = "created_at", nullable = false, updatable = false, insertable = false)
     private LocalDateTime createdAt;
 

@@ -23,10 +23,7 @@ public class RestExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(RestExceptionHandler.class);
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidation(
-            MethodArgumentNotValidException ex,
-            HttpServletRequest request
-    ) {
+    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest request) {
         String details = ex.getBindingResult().getFieldErrors().stream()
                 .map(err -> err.getField() + ": " + err.getDefaultMessage())
                 .distinct()
@@ -42,21 +39,14 @@ public class RestExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponse> handleBadJson(
-            HttpMessageNotReadableException ex,
-            HttpServletRequest request
-    ) {
-        // Не раскрываем детали Jackson исключений (иногда там лишняя внутрянка).
+    public ResponseEntity<ErrorResponse> handleBadJson(HttpMessageNotReadableException ex, HttpServletRequest request) {
         return ResponseEntity.status(400).body(
                 ErrorResponse.of("BAD_REQUEST", "Malformed JSON request", request.getRequestURI())
         );
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ErrorResponse> handleTypeMismatch(
-            MethodArgumentTypeMismatchException ex,
-            HttpServletRequest request
-    ) {
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
         String name = ex.getName();
         String value = (ex.getValue() == null) ? "null" : String.valueOf(ex.getValue());
         String message = "Invalid value for parameter '" + name + "': " + value;
@@ -67,60 +57,42 @@ public class RestExceptionHandler {
     }
 
     @ExceptionHandler(ApiException.class)
-    public ResponseEntity<ErrorResponse> handleApi(
-            ApiException ex,
-            HttpServletRequest request
-    ) {
+    public ResponseEntity<ErrorResponse> handleApi(ApiException ex, HttpServletRequest request) {
         return ResponseEntity.status(ex.getStatus()).body(
                 ErrorResponse.of(ex.getError(), ex.getMessage(), request.getRequestURI())
         );
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ErrorResponse> handleUnauthorized(
-            AuthenticationException ex,
-            HttpServletRequest request
-    ) {
+    public ResponseEntity<ErrorResponse> handleUnauthorized(AuthenticationException ex, HttpServletRequest request) {
         return ResponseEntity.status(401).body(
                 ErrorResponse.of("UNAUTHORIZED", "Unauthorized", request.getRequestURI())
         );
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleForbidden(
-            AccessDeniedException ex,
-            HttpServletRequest request
-    ) {
+    public ResponseEntity<ErrorResponse> handleForbidden(AccessDeniedException ex, HttpServletRequest request) {
         return ResponseEntity.status(403).body(
                 ErrorResponse.of("FORBIDDEN", "Forbidden", request.getRequestURI())
         );
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ErrorResponse> handleIntegrity(
-            DataIntegrityViolationException ex,
-            HttpServletRequest request
-    ) {
+    public ResponseEntity<ErrorResponse> handleIntegrity(DataIntegrityViolationException ex, HttpServletRequest request) {
         return ResponseEntity.status(409).body(
                 ErrorResponse.of("CONFLICT", "Operation violates database constraints", request.getRequestURI())
         );
     }
 
     @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
-    public ResponseEntity<ErrorResponse> handleOptimisticLock(
-            ObjectOptimisticLockingFailureException ex,
-            HttpServletRequest request
-    ) {
+    public ResponseEntity<ErrorResponse> handleOptimisticLock(ObjectOptimisticLockingFailureException ex, HttpServletRequest request) {
         return ResponseEntity.status(409).body(
                 ErrorResponse.of("CONFLICT", "Concurrent update detected. Please retry.", request.getRequestURI())
         );
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleUnexpected(
-            Exception ex,
-            HttpServletRequest request
-    ) {
+    public ResponseEntity<ErrorResponse> handleUnexpected(Exception ex, HttpServletRequest request) {
         log.error("Unexpected error for path={}", request.getRequestURI(), ex);
 
         return ResponseEntity.status(500).body(
