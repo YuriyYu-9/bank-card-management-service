@@ -55,10 +55,8 @@ public class OpenApiConfig {
     @Bean
     public OpenApiCustomizer commonErrorResponsesCustomizer() {
         return openApi -> {
-            // 1) Гарантируем, что схема ErrorResponse реально существует в components.schemas
             ensureErrorResponseSchema(openApi);
 
-            // 2) Добавляем типовые ошибки во все операции
             if (openApi.getPaths() == null) return;
 
             openApi.getPaths().values().forEach(pathItem ->
@@ -79,13 +77,11 @@ public class OpenApiConfig {
             openApi.setComponents(new Components());
         }
 
-        // Если схема уже есть — не трогаем
         Map<String, Schema> existing = openApi.getComponents().getSchemas();
         if (existing != null && existing.containsKey("ErrorResponse")) {
             return;
         }
 
-        // Принудительно генерим схему из класса ErrorResponse и кладём в components.schemas
         Map<String, Schema> schemas = ModelConverters.getInstance().read(ErrorResponse.class);
         schemas.forEach((name, schema) -> openApi.getComponents().addSchemas(name, schema));
     }
